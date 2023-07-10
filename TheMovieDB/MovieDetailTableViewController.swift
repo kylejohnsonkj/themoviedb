@@ -28,6 +28,7 @@ class MovieDetailTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.largeTitleDisplayMode = .never
     }
 
     // MARK: - Table view data source
@@ -48,7 +49,8 @@ class MovieDetailTableViewController: UITableViewController {
             }
             cell.titleLabel.text = movie.title
             cell.releaseDateLabel.text = Util.formatReleaseDate(dateString: movie.releaseDate)
-            cell.ratingLabel.text = "\(Util.roundToNearestTenth(number: movie.voteAverage))/10"
+            let rating = Util.roundToNearestTenth(number: movie.voteAverage)
+            cell.ratingLabel.text = "\(rating)/10"
             cell.ratingProgressView.progress = Float(movie.voteAverage / 10)
             
             // we want to fetch on the detail screen as well, in case the image hadn't finished fetching yet
@@ -70,8 +72,12 @@ class MovieDetailTableViewController: UITableViewController {
                 print("Failed to initialize MovieOverviewCell, returning empty cell")
                 return UITableViewCell()
             }
-            cell.overviewLabel.text = movie.overview
+            cell.overviewLabel.text = !movie.overview.isEmpty ? movie.overview : "No overview available."
             return cell
         }
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return indexPath.row == 0 ? 155 : UITableView.automaticDimension
     }
 }

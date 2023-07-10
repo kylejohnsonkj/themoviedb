@@ -25,7 +25,7 @@ class Util {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
         if let date = dateFormatter.date(from: dateString) {
-            dateFormatter.dateFormat = "MMMM dd, yyyy"
+            dateFormatter.dateFormat = "MMMM d, yyyy"
             return dateFormatter.string(from: date)
         } else {
             return nil

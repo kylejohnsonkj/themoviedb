@@ -28,7 +28,14 @@ class MovieTableViewController: UITableViewController {
     
     var noResultsLabel: UILabel {
         let label = UILabel()
-        label.text = "No results"
+        label.numberOfLines = 0
+        label.text = """
+        
+        
+        
+        
+        No results
+        """
         label.textColor = .systemGray
         label.textAlignment = .center
         return label
@@ -81,7 +88,6 @@ class MovieTableViewController: UITableViewController {
             Task {
                 if let image = try await fetcher.fetchMoviePoster(posterPath: posterPath) {
                     imageCache.setObject(image, forKey: movie.id as NSNumber)
-                    
                     await MainActor.run {
                         // before setting image, check that movie for cell has not changed
                         if movies.count > indexPath.row, movie.id == cell.movie.id {
