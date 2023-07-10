@@ -8,7 +8,7 @@
 import UIKit
 
 class MovieCell: UITableViewCell {
-    @IBOutlet weak var posterImage: UIImageView!
+    @IBOutlet weak var posterImageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var yearLabel: UILabel!
 }
@@ -16,8 +16,21 @@ class MovieCell: UITableViewCell {
 class MovieTableViewController: UITableViewController {
 
     let fetcher = MovieFetcher()
-    var movies: [Movie] = []
+    var movies: [Movie] = [] {
+        didSet {
+            tableView.backgroundView = movies.isEmpty ? noResultsLabel : nil
+        }
+    }
     
+    var imageCache = NSCache<NSNumber, UIImage>()
+    var noResultsLabel: UILabel {
+        let label = UILabel()
+        label.text = "No results"
+        label.textColor = .systemGray
+        label.textAlignment = .center
+        return label
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,7 +42,11 @@ class MovieTableViewController: UITableViewController {
         let searchController = UISearchController(searchResultsController: nil)
         searchController.delegate = self
         searchController.searchBar.delegate = self
+        searchController.hidesNavigationBarDuringPresentation = false
         navigationItem.searchController = searchController
+        
+        // reveal label if no data
+        tableView.backgroundView = noResultsLabel
     }
 
     // MARK: - Table view data source
@@ -44,12 +61,32 @@ class MovieTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "movieCell", for: indexPath) as? MovieCell else {
-            print("Error creating MovieCell, returning empty cell")
+            print("Failed to dequeue reusable cell, returning empty cell")
             return UITableViewCell()
         }
+        
         let movie = movies[indexPath.row]
         cell.titleLabel.text = movie.title
-
+        cell.yearLabel.text = DateUtils.formatYear(from: movie.releaseDate)
+        cell.posterImageView.image = nil
+        
+        // pull poster from cache if already downloaded
+        if let image = imageCache.object(forKey: movie.id as NSNumber) {
+            cell.posterImageView.image = image
+        } else if let posterPath = movie.posterPath {
+            Task {
+                if let image = try await fetcher.fetchMoviePoster(posterPath: posterPath) {
+                    imageCache.setObject(image, forKey: movie.id as NSNumber)
+                    
+                    await MainActor.run {
+                        // before setting image, check that movie for cell has not changed
+                        if movies.count > indexPath.row, movie.id == movies[indexPath.row].id {
+                            cell.posterImageView.image = image
+                        }
+                    }
+                }
+            }
+        }
         return cell
     }
 

@@ -12,6 +12,7 @@ struct MovieResponse: Decodable {
 }
 
 struct Movie: Decodable {
+    let id: Int
     let title: String
     let releaseDate: String
     let posterPath: String?
@@ -20,6 +21,7 @@ struct Movie: Decodable {
     
     // keep to Swift conventions by removing underscores in keys
     enum CodingKeys: String, CodingKey {
+        case id
         case title
         case releaseDate = "release_date"
         case posterPath = "poster_path"
@@ -49,4 +51,15 @@ struct MovieFetcher {
         let response = try JSONDecoder().decode(MovieResponse.self, from: data)
         return response.results
     }
+    
+    func fetchMoviePoster(posterPath: String) async throws -> UIImage? {
+        let urlString = "https://image.tmdb.org/t/p/original/\(posterPath)"
+        guard let url = URL(string: urlString) else {
+            print("Failed to create url for poster, returning nil")
+            return nil
+        }
+        let (data, _) = try await session.data(from: url)
+        return UIImage(data: data)
+    }
+    
 }
