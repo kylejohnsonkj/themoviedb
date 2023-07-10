@@ -15,6 +15,10 @@ class MovieDetailCell: UITableViewCell {
     @IBOutlet weak var ratingProgressView: UIProgressView!
 }
 
+class MovieOverviewCell: UITableViewCell {
+    @IBOutlet weak var overviewLabel: UILabel!
+}
+
 class MovieDetailTableViewController: UITableViewController {
 
     let fetcher = MovieFetcher()
@@ -45,6 +49,7 @@ class MovieDetailTableViewController: UITableViewController {
             cell.titleLabel.text = movie.title
             cell.releaseDateLabel.text = Util.formatReleaseDate(dateString: movie.releaseDate)
             cell.ratingLabel.text = "\(Util.roundToNearestTenth(number: movie.voteAverage))/10"
+            cell.ratingProgressView.progress = Float(movie.voteAverage / 10)
             
             // we want to fetch on the detail screen as well, in case the image hadn't finished fetching yet
             if let image = imageCache.object(forKey: movie.id as NSNumber) {
@@ -61,7 +66,12 @@ class MovieDetailTableViewController: UITableViewController {
             }
             return cell
         } else {
-            return UITableViewCell()
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "movieOverviewCell", for: indexPath) as? MovieOverviewCell else {
+                print("Failed to initialize MovieOverviewCell, returning empty cell")
+                return UITableViewCell()
+            }
+            cell.overviewLabel.text = movie.overview
+            return cell
         }
     }
 }
