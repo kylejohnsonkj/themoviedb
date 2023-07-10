@@ -11,18 +11,21 @@ class MovieCell: UITableViewCell {
     @IBOutlet weak var posterImageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var yearLabel: UILabel!
+    
+    var movie: Movie!
 }
 
 class MovieTableViewController: UITableViewController {
 
     let fetcher = MovieFetcher()
+    let imageCache = AppDelegate.imageCache
+
     var movies: [Movie] = [] {
         didSet {
             tableView.backgroundView = movies.isEmpty ? noResultsLabel : nil
         }
     }
     
-    var imageCache = NSCache<NSNumber, UIImage>()
     var noResultsLabel: UILabel {
         let label = UILabel()
         label.text = "No results"
@@ -61,13 +64,14 @@ class MovieTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "movieCell", for: indexPath) as? MovieCell else {
-            print("Failed to dequeue reusable cell, returning empty cell")
+            print("Failed to initialize MovieCell, returning empty cell")
             return UITableViewCell()
         }
         
         let movie = movies[indexPath.row]
+        cell.movie = movie
         cell.titleLabel.text = movie.title
-        cell.yearLabel.text = DateUtils.formatYear(from: movie.releaseDate)
+        cell.yearLabel.text = Util.formatYear(from: movie.releaseDate)
         cell.posterImageView.image = nil
         
         // pull poster from cache if already downloaded
@@ -80,7 +84,7 @@ class MovieTableViewController: UITableViewController {
                     
                     await MainActor.run {
                         // before setting image, check that movie for cell has not changed
-                        if movies.count > indexPath.row, movie.id == movies[indexPath.row].id {
+                        if movies.count > indexPath.row, movie.id == cell.movie.id {
                             cell.posterImageView.image = image
                         }
                     }
@@ -89,17 +93,20 @@ class MovieTableViewController: UITableViewController {
         }
         return cell
     }
-
-    /*
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedMovie = movies[indexPath.row]
+        performSegue(withIdentifier: "toDetail", sender: selectedMovie)
+    }
+    
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if let vc = segue.destination as? MovieDetailTableViewController,
+           let selectedMovie = sender as? Movie {
+            vc.movie = selectedMovie
+        }
     }
-    */
-
 }
 
 extension MovieTableViewController: UISearchControllerDelegate {

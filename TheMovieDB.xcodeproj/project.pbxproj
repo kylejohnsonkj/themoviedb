@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F02B3B42A5CC75D002C9137 /* MovieDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F02B3B32A5CC75D002C9137 /* MovieDetailTableViewController.swift */; };
 		8F54F84D2A5C68CE00F4B1CB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F54F84C2A5C68CE00F4B1CB /* AppDelegate.swift */; };
 		8F54F8542A5C68CE00F4B1CB /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8F54F8522A5C68CE00F4B1CB /* Main.storyboard */; };
 		8F54F8562A5C68CF00F4B1CB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F54F8552A5C68CF00F4B1CB /* Assets.xcassets */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8F02B3B32A5CC75D002C9137 /* MovieDetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailTableViewController.swift; sourceTree = "<group>"; };
 		8F54F8492A5C68CE00F4B1CB /* TheMovieDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TheMovieDB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F54F84C2A5C68CE00F4B1CB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8F54F8532A5C68CE00F4B1CB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 				8F54F84C2A5C68CE00F4B1CB /* AppDelegate.swift */,
 				8F54F8522A5C68CE00F4B1CB /* Main.storyboard */,
 				8F54F87C2A5C6C1E00F4B1CB /* MovieTableViewController.swift */,
+				8F02B3B32A5CC75D002C9137 /* MovieDetailTableViewController.swift */,
 				8F54F8802A5C6F9000F4B1CB /* MovieFetcher.swift */,
 				8F54F8822A5C88F700F4B1CB /* Util.swift */,
 				8F54F8552A5C68CF00F4B1CB /* Assets.xcassets */,
@@ -263,6 +266,7 @@
 			files = (
 				8F54F8812A5C6F9000F4B1CB /* MovieFetcher.swift in Sources */,
 				8F54F87D2A5C6C1E00F4B1CB /* MovieTableViewController.swift in Sources */,
+				8F02B3B42A5CC75D002C9137 /* MovieDetailTableViewController.swift in Sources */,
 				8F54F84D2A5C68CE00F4B1CB /* AppDelegate.swift in Sources */,
 				8F54F8832A5C88F700F4B1CB /* Util.swift in Sources */,
 			);
