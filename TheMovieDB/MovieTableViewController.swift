@@ -23,19 +23,14 @@ class MovieTableViewController: UITableViewController {
     var movies: [Movie] = [] {
         didSet {
             tableView.backgroundView = movies.isEmpty ? noResultsLabel : nil
+            tableView.reloadData()
         }
     }
     
     var noResultsLabel: UILabel {
         let label = UILabel()
         label.numberOfLines = 0
-        label.text = """
-        
-        
-        
-        
-        No results
-        """
+        label.text = "\n\n\n\n\nNo results"
         label.textColor = .systemGray
         label.textAlignment = .center
         return label
@@ -48,14 +43,14 @@ class MovieTableViewController: UITableViewController {
         navigationItem.title = "Movie Search"
         navigationController?.navigationBar.prefersLargeTitles = true
         
-        // add search bar
+        // add search bar to navigation item
         let searchController = UISearchController(searchResultsController: nil)
         searchController.delegate = self
         searchController.searchBar.delegate = self
         searchController.hidesNavigationBarDuringPresentation = false
         navigationItem.searchController = searchController
         
-        // reveal label if no data
+        // show label if data source is empty
         tableView.backgroundView = noResultsLabel
     }
 
@@ -78,22 +73,26 @@ class MovieTableViewController: UITableViewController {
         let movie = movies[indexPath.row]
         cell.movie = movie
         cell.titleLabel.text = movie.title
-        cell.yearLabel.text = Util.formatYear(from: movie.releaseDate)
-        cell.posterImageView.image = nil
+        cell.yearLabel.text = Util.formatYear(dateString: movie.releaseDate)
+        cell.posterImageView.image = nil // clear previous image, if any
         
         // pull poster from cache if already downloaded
         if let image = imageCache.object(forKey: movie.id as NSNumber) {
             cell.posterImageView.image = image
         } else if let posterPath = movie.posterPath {
             Task {
-                if let image = try await fetcher.fetchMoviePoster(posterPath: posterPath) {
-                    imageCache.setObject(image, forKey: movie.id as NSNumber)
-                    await MainActor.run {
+                do {
+                    // fetch movie poster if not cached
+                    if let image = try await fetcher.getMoviePoster(posterPath: posterPath) {
+                        imageCache.setObject(image, forKey: movie.id as NSNumber)
+                        
                         // before setting image, check that movie for cell has not changed
                         if movies.count > indexPath.row, movie.id == cell.movie.id {
                             cell.posterImageView.image = image
                         }
                     }
+                } catch {
+                    Util.showErrorAlert(vc: self, error: error)
                 }
             }
         }
@@ -108,6 +107,7 @@ class MovieTableViewController: UITableViewController {
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // pass the selected movie to the detail page
         if let vc = segue.destination as? MovieDetailTableViewController,
            let selectedMovie = sender as? Movie {
             vc.movie = selectedMovie
@@ -115,10 +115,11 @@ class MovieTableViewController: UITableViewController {
     }
 }
 
+// MARK: - UISearch Delegates
+
 extension MovieTableViewController: UISearchControllerDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         movies = []
-        tableView.reloadData()
     }
 }
 
@@ -126,13 +127,14 @@ extension MovieTableViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         guard !searchText.isEmpty else {
             movies = []
-            tableView.reloadData()
             return
         }
+        // fetch the movies for the given search query
         Task {
-            movies = try await fetcher.loadMovies(searchText: searchText)
-            await MainActor.run {
-                tableView.reloadData()
+            do {
+                movies = try await fetcher.getMovies(searchText: searchText)
+            } catch {
+                Util.showErrorAlert(vc: self, error: error)
             }
         }
     }

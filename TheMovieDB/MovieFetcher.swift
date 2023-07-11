@@ -33,7 +33,7 @@ struct Movie: Decodable {
 struct MovieFetcher {
     let session = URLSession.shared
     
-    func loadMovies(searchText: String) async throws -> [Movie] {
+    func getMovies(searchText: String) async throws -> [Movie] {
         guard let query = searchText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             print("Invalid search query, returning empty results")
             return []
@@ -52,7 +52,7 @@ struct MovieFetcher {
         return response.results
     }
     
-    func fetchMoviePoster(posterPath: String) async throws -> UIImage? {
+    func getMoviePoster(posterPath: String) async throws -> UIImage? {
         let urlString = "https://image.tmdb.org/t/p/original/\(posterPath)"
         guard let url = URL(string: urlString) else {
             print("Failed to create url for poster, returning nil")

@@ -47,22 +47,27 @@ class MovieDetailTableViewController: UITableViewController {
                 print("Failed to initialize MovieDetailCell, returning empty cell")
                 return UITableViewCell()
             }
+            
             cell.titleLabel.text = movie.title
             cell.releaseDateLabel.text = Util.formatReleaseDate(dateString: movie.releaseDate)
-            let rating = Util.roundToNearestTenth(number: movie.voteAverage)
+            
+            let rating = (movie.voteAverage * 10).rounded() / 10
             cell.ratingLabel.text = "\(rating)/10"
             cell.ratingProgressView.progress = Float(movie.voteAverage / 10)
             
-            // we want to fetch on the detail screen as well, in case the image hadn't finished fetching yet
+            // pull poster from cache if already downloaded
             if let image = imageCache.object(forKey: movie.id as NSNumber) {
                 cell.largePosterImageView.image = image
             } else if let posterPath = movie.posterPath {
                 Task {
-                    if let image = try await fetcher.fetchMoviePoster(posterPath: posterPath) {
-                        imageCache.setObject(image, forKey: movie.id as NSNumber)
-                        await MainActor.run {
+                    do {
+                        // attempt to fetch poster here as well, in case the image hadn't finished downloading yet
+                        if let image = try await fetcher.getMoviePoster(posterPath: posterPath) {
+                            imageCache.setObject(image, forKey: movie.id as NSNumber)
                             cell.largePosterImageView.image = image
                         }
+                    } catch {
+                        Util.showErrorAlert(vc: self, error: error)
                     }
                 }
             }
@@ -77,6 +82,7 @@ class MovieDetailTableViewController: UITableViewController {
         }
     }
     
+    // specify heights to avoid constraint warnings
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return indexPath.row == 0 ? 155 : UITableView.automaticDimension
     }

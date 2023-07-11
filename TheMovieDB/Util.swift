@@ -6,33 +6,32 @@
 //
 
 import Foundation
+import UIKit
 
 class Util {
-    static func formatYear(from dateString: String) -> String? {
+    private static func formatDate(from dateString: String, outputFormat: String) -> String? {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
-        if let date = dateFormatter.date(from: dateString) {
-            dateFormatter.dateFormat = "yyyy"
-            return dateFormatter.string(from: date)
-        } else {
+        guard let date = dateFormatter.date(from: dateString) else {
             return nil
         }
+        dateFormatter.dateFormat = outputFormat
+        return dateFormatter.string(from: date)
+    }
+    
+    static func formatYear(dateString: String) -> String? {
+        return formatDate(from: dateString, outputFormat: "yyyy")
     }
     
     static func formatReleaseDate(dateString: String) -> String? {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        
-        if let date = dateFormatter.date(from: dateString) {
-            dateFormatter.dateFormat = "MMMM d, yyyy"
-            return dateFormatter.string(from: date)
-        } else {
-            return nil
-        }
+        return formatDate(from: dateString, outputFormat: "MMMM d, yyyy")
     }
     
-    static func roundToNearestTenth(number: Double) -> Double {
-        return (number * 10).rounded() / 10
+    @MainActor
+    static func showErrorAlert(vc: UIViewController, error: Error) {
+        let alert = UIAlertController(title: "Fetch Error", message: error.localizedDescription, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        vc.present(alert, animated: true)
     }
 }
