@@ -17,6 +17,7 @@ struct Movie: Decodable {
     let releaseDate: String
     let posterPath: String?
     let voteAverage: Double
+    let voteCount: Int
     let overview: String
     
     // keep to Swift conventions by removing underscores in keys
@@ -26,6 +27,7 @@ struct Movie: Decodable {
         case releaseDate = "release_date"
         case posterPath = "poster_path"
         case voteAverage = "vote_average"
+        case voteCount = "vote_count"
         case overview
     }
 }

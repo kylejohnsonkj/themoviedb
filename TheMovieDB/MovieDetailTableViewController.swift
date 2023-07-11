@@ -52,7 +52,7 @@ class MovieDetailTableViewController: UITableViewController {
             cell.releaseDateLabel.text = Util.formatReleaseDate(dateString: movie.releaseDate)
             
             let rating = (movie.voteAverage * 10).rounded() / 10
-            cell.ratingLabel.text = "\(rating)/10"
+            cell.ratingLabel.text = movie.voteCount != 0 ? "\(rating)/10" : "N/A"
             cell.ratingProgressView.progress = Float(movie.voteAverage / 10)
             
             // pull poster from cache if already downloaded
